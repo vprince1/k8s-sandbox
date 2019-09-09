@@ -119,8 +119,10 @@ but to different versions.
 * If you are ready, you can run ```./push.sh``` to push the image to the docker account
 
 # 5) Microservice talking to another Microservice
+### Prerequisites
+Spin up the k8s-service-1 by following these [steps](#2-microservice-on-kubernetes-and-docker-desktop)
+### Client Microservice
 We write a microservice that will make a call to the k8s-service-1 microservice.
-Before this microservice is spun-up, follow the steps shown [here](#2-microservice-on-kubernetes-and-docker-desktop)
 
 * Enable Kubernetes in Docker Desktop preference
 * Switch to docker-for-desktop
