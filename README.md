@@ -14,7 +14,7 @@ Create a simple springboot app with a REST endpoint and run it on Kubernetes and
 * Update docker.image.prefix in pom.xml
 * JDK 11
 
-# 1) Microservice on Kubernetes and Minikube
+# Microservice on Kubernetes and Minikube
 
 ## Running microservice on Minikube and Kubernetes
 * Install minikube and start
@@ -39,7 +39,7 @@ minikube service k8s-service-1 --url
 curl $(minikube service k8s-service-1 --url)/hello
 ```
 
-# 2) Microservice on Kubernetes and Docker Desktop
+# Microservice on Kubernetes and Docker Desktop
 We can run kubernetes using Docker Desktop instead of minikube.
 
 * Enable Kubernetes in Docker Desktop preference
@@ -61,7 +61,7 @@ The below command gets the NodePort for port 8081
 curl http://localhost:$(kubectl get services k8s-service-1 -o jsonpath='{.spec.ports[?(@.port==8081)].nodePort}')/hello
 ```
 
-# 3) Microservice on Kubernetes with Istio mesh in Minikube
+# Microservice on Kubernetes with Istio mesh in Minikube
 ## Install Istio
 I have installed Istio in my local minikube on virtualbox VM in my OSX laptop. Platform specific instructions
 are in https://istio.io/docs/setup/kubernetes/platform-setup/
@@ -108,7 +108,7 @@ You should get a string output like
 This is hello from version 1
 ```
 
-# 4) Run 2 versions of the microservice
+# Run 2 versions of the microservice
 The springboot app has a REST endpoint '/hello' that returns a message 'This is hello from version 1'. 
 We want to update the message to 'This is hello from version 2'. These 2 should belong to the same microservice,
 but to different versions.
@@ -120,9 +120,9 @@ but to different versions.
 * Run ```curl http://localhost:8083/hello```. This should return 'This is hello from version 2'
 * If you are ready, you can run ```./push.sh``` to push the image to the docker account
 
-# 5) Microservice talking to another Microservice(#-2-microservice-on-kubernetes-and-docker-desktop)
+# Microservice talking to another Microservice
 We write a microservice that will make a call to the k8s-service-1 microservice.
-Before this microservice is spun-up, follow the steps shown [here](#-2-microservice-on-kubernetes-and-docker-desktop)
+Before this microservice is spun-up, follow the steps shown [here](#-microservice-on-kubernetes-and-docker-desktop)
 
 * Enable Kubernetes in Docker Desktop preference
 * Switch to docker-for-desktop
