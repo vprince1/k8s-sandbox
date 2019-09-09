@@ -1,0 +1,38 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: k8s-service-1
+  labels:
+    release: test
+    app: service-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: test
+      app: service-1
+  template:
+    metadata:
+      labels:
+        release: test
+        app: service-1
+    spec:
+      containers:
+      - name: k8s-service-1-container
+        image: vprince/k8s-service-1-image:latest
+        ports:
+        - containerPort: 8081
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: k8s-service-1
+spec:
+  type: NodePort
+  selector:
+    app: service-1
+    release: test
+  ports:
+  - nodePort: 30163
+    port: 8081
