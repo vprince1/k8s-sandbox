@@ -14,7 +14,7 @@ Create a simple springboot app with a REST endpoint and run it on Kubernetes and
 * Update docker.image.prefix in pom.xml
 * JDK 11
 
-# 1) Getting Started with Microservice on Kubernetes and Minikube
+# 1) Microservice on Kubernetes and Minikube
 
 ## Running microservice on Minikube and Kubernetes
 * Install minikube and start
@@ -39,7 +39,7 @@ minikube service k8s-service-1 --url
 curl $(minikube service k8s-service-1 --url)/hello
 ```
 
-# 2) Use Docker Desktop kubernetes service
+# 2) Microservice on Kubernetes and Docker Desktop
 We can run kubernetes using Docker Desktop instead of minikube.
 
 * Enable Kubernetes in Docker Desktop preference
@@ -61,7 +61,7 @@ The below command gets the NodePort for port 8081
 curl http://localhost:$(kubectl get services k8s-service-1 -o jsonpath='{.spec.ports[?(@.port==8081)].nodePort}')/hello
 ```
 
-# 3) Run microservice on Kubernetes and Istio service mesh in Minikube
+# 3) Microservice on Kubernetes with Istio mesh in Minikube
 ## Install Istio
 I have installed Istio in my local minikube on virtualbox VM in my OSX laptop. Platform specific instructions
 are in https://istio.io/docs/setup/kubernetes/platform-setup/
