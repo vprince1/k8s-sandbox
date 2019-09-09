@@ -119,3 +119,27 @@ but to different versions.
 * Run ```curl http://localhost:8082/hello```. This should return 'This is hello from version 1'
 * Run ```curl http://localhost:8083/hello```. This should return 'This is hello from version 2'
 * If you are ready, you can run ```./push.sh``` to push the image to the docker account
+
+# 5) Microservice talking to another Microservice(#-2-microservice-on-kubernetes-and-docker-desktop)
+We write a microservice that will make a call to the k8s-service-1 microservice.
+Before this microservice is spun-up, follow the steps shown [here](#-2-microservice-on-kubernetes-and-docker-desktop)
+
+* Enable Kubernetes in Docker Desktop preference
+* Switch to docker-for-desktop
+```
+kubectl config use-context docker-for-desktop
+```
+* The below command will build and push the docker image to your github account
+```
+mvn -f k8s-client/pom.xml clean install
+```
+* Install the service into the default kubernetes cluster
+```
+kubectl apply -f k8s-client/kubernetes/k8s-client-deployment.yaml
+```
+* Validate you can access the service. The app is will be listening on port 8081.
+The below command gets the NodePort for port 8080
+```
+curl http://localhost:$(kubectl get services k8s-client-service -o jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')/welcome
+```
+
