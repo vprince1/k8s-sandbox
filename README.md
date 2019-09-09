@@ -15,8 +15,6 @@ Create a simple springboot app with a REST endpoint and run it on Kubernetes and
 * JDK 11
 
 # Microservice on Kubernetes and Minikube
-
-## Running microservice on Minikube and Kubernetes
 * Install minikube and start
 ```
 brew cask install minikube
@@ -61,7 +59,7 @@ The below command gets the NodePort for port 8081
 curl http://localhost:$(kubectl get services k8s-service-1 -o jsonpath='{.spec.ports[?(@.port==8081)].nodePort}')/hello
 ```
 
-# Microservice on Kubernetes with Istio mesh in Minikube
+# 1) Microservice on Kubernetes with Istio mesh in Minikube
 ## Install Istio
 I have installed Istio in my local minikube on virtualbox VM in my OSX laptop. Platform specific instructions
 are in https://istio.io/docs/setup/kubernetes/platform-setup/
@@ -122,7 +120,7 @@ but to different versions.
 
 # Microservice talking to another Microservice
 We write a microservice that will make a call to the k8s-service-1 microservice.
-Before this microservice is spun-up, follow the steps shown [here](#-microservice-on-kubernetes-and-docker-desktop)
+Before this microservice is spun-up, follow the steps shown [here](#microservice-on-kubernetes-and-docker-desktop)
 
 * Enable Kubernetes in Docker Desktop preference
 * Switch to docker-for-desktop
