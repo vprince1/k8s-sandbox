@@ -59,28 +59,40 @@ The below command gets the NodePort for port 8081
 curl http://localhost:$(kubectl get services k8s-service-1 -o jsonpath='{.spec.ports[?(@.port==8081)].nodePort}')/hello
 ```
 
-# 3) Microservice on Kubernetes with Istio mesh in Minikube
-## Install Istio
-I have installed Istio in my local minikube on virtualbox VM in my OSX laptop. Platform specific instructions
-are in https://istio.io/docs/setup/kubernetes/platform-setup/
-
-* Start minikube with more than the default memory
-```
-minikube start --memory=6144 --cpus=2
-```
-* Install isto: More details on https://istio.io/docs/setup/kubernetes/#downloading-the-release
+# 3) Install Istio
+I have installed Istio in my local minikube on virtualbox VM in my OSX laptop and also tested on Docker Desktop. 
+Platform specific instructions are in https://istio.io/docs/setup/kubernetes/platform-setup/
+* Create a new kubernetes cluster when using istio.
+  * Minikube: Delete and recreate the VM.
+    ```
+    minikube delete
+    minikube start --memory=6144 --cpus=2
+    ```
+  * Docker Desktop: Restart Docker Desktop
+* Download isto: More details on https://istio.io/docs/setup/kubernetes/#downloading-the-release
 ```
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.5 sh -
+```
+* Set the path to use istioctl
+```
 cd istio-1.2.5
 export PATH=$PWD/bin:$PATH
 ```
-I used ```brew install istioctl``` to install on my mac.
+I used ```brew install istioctl``` to install on my mac. Hence, I did not have to update my PATH variable.
+NOTE: make sure the istio versions are the same if you are using istioctl installed by brew.
 * Setup the cluster to automatically create a istio sidecar for each pod
 ```
 for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
 kubectl apply -f install/kubernetes/istio-demo-auth.yaml
+```
+* Update the 'default' namespace to automatically enable istio injection. This will automatically add all newly
+installed objects with an istio sidecar.
+```
 kubectl label namespace default istio-injection=enabled
 ```
+
+# 4) Microservice on Kubernetes with Istio mesh in Minikube
+* Follow the [Install Istio](#3-install-istio) steps
 * Install your k8s application
 ```
 kubectl create -f k8s-service-1/kubernetes/istio-service-1-deployment.yaml
