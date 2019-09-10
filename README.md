@@ -78,8 +78,6 @@ curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.5 sh -
 cd istio-1.2.5
 export PATH=$PWD/bin:$PATH
 ```
-I used ```brew install istioctl``` to install on my mac. Hence, I did not have to update my PATH variable.
-NOTE: make sure the istio versions are the same if you are using istioctl installed by brew.
 * Setup the cluster to automatically create a istio sidecar for each pod
 ```
 for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
@@ -89,6 +87,21 @@ kubectl apply -f install/kubernetes/istio-demo-auth.yaml
 installed objects with an istio sidecar.
 ```
 kubectl label namespace default istio-injection=enabled
+```
+NOTE: I used ```brew install istioctl``` to install on my mac. Hence, I did not update my PATH variable.
+In this case, make sure the istio installed object versions are all the same.
+You can verify this by running the below command and validate all versions are 1.2.5
+```
+ $ istioctl version
+client version: 1.2.5
+citadel version: 1.2.5
+egressgateway version: 1.2.5
+galley version: 1.2.5
+ingressgateway version: 1.2.5
+pilot version: 1.2.5
+policy version: 1.2.5
+sidecar-injector version: 1.2.5
+telemetry version: 1.2.5
 ```
 
 # 4) Microservice on Kubernetes with Istio mesh in Minikube
