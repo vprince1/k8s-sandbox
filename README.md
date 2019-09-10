@@ -68,7 +68,7 @@ Platform specific instructions are in https://istio.io/docs/setup/kubernetes/pla
     minikube delete
     minikube start --memory=6144 --cpus=2
     ```
-  * Docker Desktop: Restart Docker Desktop
+  * Docker Desktop: In 'Docker Desktop' preferences, click 'Reset Kubernetes Cluster'
 * Download isto: More details on https://istio.io/docs/setup/kubernetes/#downloading-the-release
 ```
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.5 sh -
