@@ -155,7 +155,7 @@ The below command gets the NodePort for port 8080
 curl http://localhost:$(kubectl get services k8s-client-service -o jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')/welcome
 ```
 
-# 6) Microservice talking to another Microservice with Istio Mesh
+# 7) Microservice talking to another Microservice with Istio Mesh
 * Follow the [Install Istio](#3-install-istio) steps
 * Install the 2 microservices
 ```
