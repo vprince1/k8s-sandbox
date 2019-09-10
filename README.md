@@ -155,3 +155,37 @@ The below command gets the NodePort for port 8080
 curl http://localhost:$(kubectl get services k8s-client-service -o jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')/welcome
 ```
 
+# 6) Microservice talking to another Microservice with Istio Mesh
+* Follow the [Install Istio](#3-install-istio) steps
+* Install the 2 microservices
+```
+# Create  k8s-service-1 deployment and istio ingress gateway
+kubectl create -f k8s-service-1/kubernetes/istio-service-1-deployment.yaml
+kubectl create -f k8s-service-1/kubernetes/istio-service-1-gateway.yaml
+
+# Create  k8s-client deployment and istio ingress gateway
+kubectl create -f k8s-client/kubernetes/istio-client-deployment.yaml
+kubectl create -f k8s-client/kubernetes/istio-client-gateway.yaml
+```
+* Wait for the pods to be created
+```
+watch kubectl get pods
+```
+NOTE: Make sure both the service and the sidecar are up. You should see 2/2 to be certain your service is also having a sidecar
+* Validate your k8s-service-1 is working as expected
+```
+curl http://localhost:$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')/hello
+```
+You should get a string output like
+```
+This is hello from version 1
+```
+* Validate your k8s-client microservice is working.
+```
+curl http://localhost:$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')/welcome
+```
+You should get a string output like
+```
+This is hello from version 1
+```
+This output should be the same as the above because this service calls the k8s-service-1 REST endpoint

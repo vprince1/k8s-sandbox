@@ -1,0 +1,36 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: istio-client
+spec:
+  selector:
+    app: client
+    release: test
+  ports:
+    - port: 8080
+      name: http
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: istio-client
+  labels:
+    app: client
+    release: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+      release: test
+  template:
+    metadata:
+      labels:
+        app: client
+        release: test
+    spec:
+      containers:
+      - name: istio-client-container
+        image: vprince/k8s-client-image:latest
+        ports:
+        - containerPort: 8080
