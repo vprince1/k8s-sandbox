@@ -227,6 +227,20 @@ communication, we would like to be able to create services within a namespace an
   cd k8s-sandbox
   kubectl apply -f kubernetes-global/create-namespace.yaml
   ```
+  Note: The namespace has istio-injection=enabled. This means that all new services will automatically
+  have a sidecar created.
+  You can remove the automatic creation of a sidecar using the following command
+  ```
+  kubectl label namespace vj-istio istio-injection-
+  kubectl delete pod -n vj-istio $(kubectl get pod -n vj-istio -l app=client -o jsonpath={.items..metadata.name})
+  ```
+  The pods that are created will not have a sidecar. You can validate that by running command
+  ```kubectl get pod -n vj-istio -l app=client```. This will show that only the pod is up without the sidecar.
+  You can see READY only shows 1/1 instead of 2/2
+  ```
+  NAME                            READY   STATUS    RESTARTS   AGE
+  k8s-client-7cdfd88958-m8sm6     1/1     Running   0          56s
+  ```
 * Install the k8s-service-1 and k8s-client microservices
   ```
   kubectl create -f k8s-service-1/kubernetes/istio-service-1-ns-deployment.yaml
