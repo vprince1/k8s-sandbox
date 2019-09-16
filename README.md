@@ -68,7 +68,11 @@ Platform specific instructions are in https://istio.io/docs/setup/kubernetes/pla
     minikube delete
     minikube start --memory=6144 --cpus=2
     ```
-  * Docker Desktop: In 'Docker Desktop' preferences, click 'Reset Kubernetes Cluster'
+  * Docker Desktop: In 'Docker Desktop' preferences, click 'Reset Kubernetes Cluster'.
+    It is recommended to use Docker Desktop because I used it to run all my tests.
+    ```
+    kubectl config use-context docker-for-desktop
+    ```
 * Download isto: More details on https://istio.io/docs/setup/kubernetes/#downloading-the-release
 ```
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.5 sh -
@@ -81,11 +85,15 @@ export PATH=$PWD/bin:$PATH
 * Setup the cluster to automatically create a istio sidecar for each pod
 ```
 for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
+# The below will automatically enable mTLS between all services in a mesh
+# If you do not want to enable mTLS meshwide, use command
+# kubectl apply -f install/kubernetes/istio-demo.yaml
 kubectl apply -f install/kubernetes/istio-demo-auth.yaml
 ```
 * Update the 'default' namespace to automatically enable istio injection. This will automatically add all newly
 installed objects with an istio sidecar.
 ```
+# This step can be skipped if you do not want to add sidecar automatically
 kubectl label namespace default istio-injection=enabled
 ```
 NOTE: I used ```brew install istioctl``` to install on my mac. Hence, I did not update my PATH variable.
@@ -202,3 +210,104 @@ You should get a string output like
 This is hello from version 1
 ```
 This output should be the same as the above because this service calls the k8s-service-1 REST endpoint
+
+# ISTIO capabilities
+In the below section, I try to test out the different facets of the istio service mesh
+
+## mTLS between services in a namespace
+I would like to enable mTLS authentication for all services in a namespace. In situations where we do not want to enable global mTLS
+communication, we would like to be able to create services within a namespace and then secure them with mTLS
+
+* Follow the [Install Istio](#3-install-istio) steps
+  * When following the install steps, use ```kubectl apply -f install/kubernetes/istio-demo.yaml``` instead of
+    ```kubectl apply -f install/kubernetes/istio-demo-auth.yaml```. This is to prevent meshwide mTLS
+  * When following the install steps, do not execute command ```kubectl label namespace default istio-injection=enabled```
+* Create a custom namespace called ```vj-istio``` by running the command
+  ```
+  cd k8s-sandbox
+  kubectl apply -f kubernetes-global/create-namespace.yaml
+  ```
+* Install the k8s-service-1 and k8s-client microservices
+  ```
+  kubectl create -f k8s-service-1/kubernetes/istio-service-1-ns-deployment.yaml
+  kubectl create -f k8s-service-1/kubernetes/istio-service-1-ns-gateway.yaml
+  kubectl create -f k8s-client/kubernetes/istio-client-ns-deployment.yaml
+  kubectl create -f k8s-client/kubernetes/istio-client-ns-gateway.yaml
+  ```
+* Wait for the pods to be created
+  ```
+  watch kubectl get pods -n vj-istio
+  ```
+* After the pods are created you can run the below TLS check command
+  ```
+  istioctl authn tls-check -n vj-istio $(kubectl get pod -n vj-istio -l app=service-1 -o jsonpath={.items..metadata.name}) k8s-service-1.vj-istio.svc.cluster.local
+  istioctl authn tls-check -n vj-istio $(kubectl get pod -n vj-istio -l app=client -o jsonpath={.items..metadata.name}) k8s-client.vj-istio.svc.cluster.local
+  ```
+  If you do not pass in the HOST name at the end of the command, you will see the status of all the services
+  ```
+  istioctl authn tls-check -n vj-istio $(kubectl get pod -n vj-istio -l app=client -o jsonpath={.items..metadata.name})
+  ```
+  The output will look like
+  ```
+  HOST:PORT                                                     STATUS     SERVER        CLIENT     AUTHN POLICY                                 DESTINATION RULE
+  k8s-client.vj-istio.svc.cluster.local:8080                    OK         HTTP/mTLS     HTTP       default/                                     -
+  k8s-service-1.vj-istio.svc.cluster.local:8081                 OK         HTTP/mTLS     HTTP       default/                                     -
+  ```
+  As you can see, the server and the client for both services are not using mTLS exclusively
+* To validate you can connect to the client and service-1 end points, run the following command
+  ```
+  # service
+  curl http://localhost:80/hello
+  # client
+  curl http://localhost:80/welcome
+  ```
+  You should see the output ```This is hello from version 1```
+* Apply policy to enable mTLS in the vj-istio namespace
+  ```
+  kubectl apply -f istio/create-policy.yaml
+  ```
+* Run the TLS check command
+  ```
+  istioctl authn tls-check -n vj-istio $(kubectl get pod -n vj-istio -l app=client -o jsonpath={.items..metadata.name})
+  ```
+  You will notice a CONFLICT
+  ```
+  HOST:PORT                                                     STATUS       SERVER        CLIENT     AUTHN POLICY                                 DESTINATION RULE
+  k8s-client.vj-istio.svc.cluster.local:8080                    CONFLICT     mTLS          HTTP       default/vj-istio                             -
+  k8s-service-1.vj-istio.svc.cluster.local:8081                 CONFLICT     mTLS          HTTP       default/vj-istio                             -
+  ```
+* To validate you can connect to the client and service-1 end points, run the following command
+  ```
+  # service
+  curl http://localhost:80/hello
+  ```
+  You should see the output ```This is hello from version 1```
+  ```
+  # client
+  curl http://localhost:80/welcome
+  ```
+  You should see the output ```upstream connect error or disconnect/reset before headers. reset reason: connection termination```.
+  This is because the k8s-service-1 sidecar will reject all non-mTLS communucations
+* To enable the client to talk with the service, you will need to add a ```DestinationRule```. Run the following command
+  ```
+  kubectl apply -f istio/create-destination-rule.yaml
+  ```
+* Run the TLS check command
+  ```
+  istioctl authn tls-check -n vj-istio $(kubectl get pod -n vj-istio -l app=client -o jsonpath={.items..metadata.name})
+  ```
+  You will notice the status is now ```OK```
+  ```
+  HOST:PORT                                                     STATUS     SERVER        CLIENT     AUTHN POLICY                                 DESTINATION RULE
+  k8s-client.vj-istio.svc.cluster.local:8080                    OK         mTLS          mTLS       default/vj-istio                             default/vj-istio
+  k8s-service-1.vj-istio.svc.cluster.local:8081                 OK         mTLS          mTLS       default/vj-istio                             default/vj-istio
+  ```
+* To validate you can connect to the client and service-1 end points, run the following command
+  ```
+  # service
+  curl http://localhost:80/hello
+  # client
+  curl http://localhost:80/welcome
+  ```
+  You should see the output ```This is hello from version 1```.
+* Now all the communication between the services in the namespace are over mTLS
