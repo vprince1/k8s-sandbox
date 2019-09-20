@@ -20,7 +20,7 @@ Create a simple springboot app with a REST endpoint and run it on Kubernetes and
 brew cask install minikube
 minikube start --memory=6144 --cpus=2
 ```
-* The below command will build and push the docker image to your github account
+* The below command will build and push the docker image to your docker hub account
 ```
 mvn -f k8s-service-1/pom.xml clean install
 ```
@@ -45,7 +45,7 @@ We can run kubernetes using Docker Desktop instead of minikube.
 ```
 kubectl config use-context docker-for-desktop
 ```
-* The below command will build and push the docker image to your github account
+* The below command will build and push the docker image to your docker hub account
 ```
 mvn -f k8s-service-1/pom.xml clean install
 ```
@@ -162,7 +162,7 @@ We write a microservice that will make a call to the k8s-service-1 microservice.
 ```
 kubectl config use-context docker-for-desktop
 ```
-* The below command will build and push the docker image to your github account
+* The below command will build and push the docker image to your docker hub account
 ```
 mvn -f k8s-client/pom.xml clean install
 ```
