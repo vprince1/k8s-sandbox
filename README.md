@@ -332,17 +332,17 @@ Istio to handle origin authentication using JWT. We will use Auth0 for JWT valid
 * Follow the steps mentioned in [mTLS setup](#mtls-between-services-in-a-namespace)
 * Create an account with Auth0
   * Click 'APIs' on the left side of the screen and click on 'CREATE API'
-    ![Image of Create API Init](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-api-init.png)
+    ![Image of Create API Init](images/auth0-api-init.png)
   * If you are running your kubernetes cluster on localhost, enter the following values as shown in the image
-    ![Image of Create API](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-api-create.png)
+    ![Image of Create API](images/auth0-api-create.png)
   * After a successfull creation, you can go to the tab 'Test' and store the curl command
-    ![Image of curl command](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-api-test.png)
+    ![Image of curl command](images/auth0-api-test.png)
   * Click on the 'Applications' on the left side of the screen. You will see an application automatically created.
-    ![Image of Application screen](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-app-init.png)
+    ![Image of Application screen](images/auth0-app-init.png)
   * Click on the new application and scroll down and click on the 'Show Advanced Settings' link
-    ![Image of Adv. settings](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-app-adv.png)
+    ![Image of Adv. settings](images/auth0-app-adv.png)
   * Click on the 'Endpoints' tab and note the 'JSON Web Key Set' URL. This should be used to ```update istio/create-policy-jwt.yaml``` file.
-    ![Image of Endpoints](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-app-endpoint.png)
+    ![Image of Endpoints](images/auth0-app-endpoint.png)
 * Execute the below command to update the auth policy
   ```
   kubectl apply -f istio/create-policy-jwt.yaml
