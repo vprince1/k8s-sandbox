@@ -325,3 +325,72 @@ communication, we would like to be able to create services within a namespace an
   ```
   You should see the output ```This is hello from version 1```.
 * Now all the communication between the services in the namespace are over mTLS
+
+## Origin Authentication using JWT
+This is also called end-user authentication. It is used to verify the original service or end-user making the request. We can setup 
+Istio to handle origin authentication using JWT. We will use Auth0 for JWT validation.
+* Follow the steps mentioned in [mTLS setup](#mtls-between-services-in-a-namespace)
+* Create an account with Auth0
+  * Click 'APIs' on the left side of the screen and click on 'CREATE API'
+    ![Image of Create API Init](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-api-init.png)
+  * If you are running your kubernetes cluster on localhost, enter the following values as shown in the image
+    ![Image of Create API](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-api-create.png)
+  * After a successfull creation, you can go to the tab 'Test' and store the curl command
+    ![Image of curl command](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-api-test.png)
+  * Click on the 'Applications' on the left side of the screen. You will see an application automatically created.
+    ![Image of Application screen](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-app-init.png)
+  * Click on the new application and scroll down and click on the 'Show Advanced Settings' link
+    ![Image of Adv. settings](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-app-adv.png)
+  * Click on the 'Endpoints' tab and note the 'JSON Web Key Set' URL. This should be used to ```update istio/create-policy-jwt.yaml``` file.
+    ![Image of Endpoints](https://github.com/vprince1/k8s-sandbox/tree/master/images/auth0-app-endpoint.png)
+* Execute the below command to update the auth policy
+  ```
+  kubectl apply -f istio/create-policy-jwt.yaml
+  ```
+* Validate you have installed ```jq``` in your machine by using command ```jq --version```
+* Update your curl command to store the access token in a variable
+```
+export JWT_TOKEN=$(curl --request POST \
+  --url https://vprince.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{"client_id":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,"client_secret":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","audience":"localhost","grant_type":"client_credentials"}' | jq -r '.access_token')
+```
+* Validate you have a valid JWT_TOKEN and then test the below command
+```
+curl http://localhost:80/echoheaders -H "Authorization: Bearer $JWT_TOKEN"
+```
+* You should get the request headers from both microservices
+```
+Client Request Details:
+{
+host=localhost,
+user-agent=curl/7.54.0,
+accept=*/*,
+authorization=Bearer XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,
+x-forwarded-for=192.168.65.3,
+x-forwarded-proto=http,
+x-request-id=f81c7249-c63b-9ec4-b9a4-25074e093929,
+content-length=0,
+x-envoy-internal=true,
+x-forwarded-client-cert=By=spiffe://cluster.local/ns/vj-istio/sa/default;Hash=ebea03cd3c211d2afbd051972b7cc4e75e9c903201af30b197ca7b4d5d8353d7;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account,
+x-b3-traceid=1b83671f3069eed4413a65fde7f59ac4,
+x-b3-spanid=28f43f1f859036ea,
+x-b3-parentspanid=413a65fde7f59ac4,
+x-b3-sampled=1
+}
+Service Request Details:
+{
+host=k8s-service-1:8081,
+accept=text/plain, application/json, application/*+json, */*,
+authorization=Bearer XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,
+user-agent=Java/11.0.4,
+x-forwarded-proto=http,
+x-request-id=b149ba64-ca36-9539-9e60-65a9a6a3cbe4,
+content-length=0,
+x-forwarded-client-cert=By=spiffe://cluster.local/ns/vj-istio/sa/default;Hash=03d0b4f4d5d63aed8bcaf7401d3298b76ea0a91577daa75e53de3fdc353dfad1;Subject="";URI=spiffe://cluster.local/ns/vj-istio/sa/default,
+x-b3-traceid=bfe2b930b0e3360fce4688d634bc85c6,
+x-b3-spanid=e0e990802da0c26c,
+x-b3-parentspanid=ce4688d634bc85c6,
+x-b3-sampled=1
+}
+```

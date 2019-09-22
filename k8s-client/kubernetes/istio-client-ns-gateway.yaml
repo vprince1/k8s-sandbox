@@ -28,6 +28,8 @@ spec:
   - match:
     - uri:
         exact: /welcome
+    - uri:
+        exact: /echoheaders
     route:
     - destination:
         host: k8s-client

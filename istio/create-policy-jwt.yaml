@@ -1,0 +1,18 @@
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: Policy
+metadata:
+  name: vj-istio-jwt
+  namespace: vj-istio
+spec:
+  targets:
+  - name: k8s-service-1
+  - name: k8s-client
+  peers:
+  - mtls: {}
+  origins:
+  - jwt:
+      audiences:
+      - "localhost"
+      issuer: "https://vprince.auth0.com/"
+      jwksUri: "https://vprince.auth0.com/.well-known/jwks.json"
+  principalBinding: USE_ORIGIN
