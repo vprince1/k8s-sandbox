@@ -343,7 +343,7 @@ Istio to handle origin authentication using JWT. We will use Auth0 for JWT valid
     ![Image of Adv. settings](images/auth0-app-adv.png)
   * Click on the 'Endpoints' tab and note the 'JSON Web Key Set' URL. This should be used to ```update istio/create-policy-jwt.yaml``` file.
     ![Image of Endpoints](images/auth0-app-endpoint.png)
-* Execute the below command to update the auth policy
+* Execute the below command to update the auth policy after updating the values for ```issuer``` and ```jwksUri``` in ```istio/create-policy-jwt.yaml```
   ```
   kubectl apply -f istio/create-policy-jwt.yaml
   ```
