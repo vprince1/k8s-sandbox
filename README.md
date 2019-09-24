@@ -343,7 +343,7 @@ Istio to handle origin authentication using JWT. We will use Auth0 for JWT valid
     ![Image of Adv. settings](images/auth0-app-adv.png)
   * Click on the 'Endpoints' tab and note the 'JSON Web Key Set' URL. This should be used to ```update istio/create-policy-jwt.yaml``` file.
     ![Image of Endpoints](images/auth0-app-endpoint.png)
-* Update the auth policy ```istio/create-policy-jwt.yaml``` with using the URL stored from Auth0. 
+* Update the auth policy ```istio/create-policy-jwt.yaml``` using the 'JSON Web Key Set' URL stored from Auth0. 
 The fields ```issuer``` and ```jwksUri``` will need to be updated.
 * Execute the below command to update the auth policy.
   ```
