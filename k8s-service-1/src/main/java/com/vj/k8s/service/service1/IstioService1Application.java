@@ -24,10 +24,12 @@ public class IstioService1Application {
 	
 	@RequestMapping("/echoserviceheaders")
     public String hello(@RequestHeader Map<String, String> headers) {
+		String podName = "Pod Name: "+System.getenv("HOSTNAME")+"\n";
 		String mapAsString = headers.entrySet().stream()
 				.map(entry -> entry.getKey() + "=" + entry.getValue())
 				.collect(Collectors.joining(", \n", "{\n", "\n}\n"));
-		return "Service Request Details: \n"+mapAsString;
+		String reqDetails = podName + mapAsString;
+		return "Service Request Details: \n"+reqDetails;
     }
 
 }

@@ -50,13 +50,15 @@ public class IstioClientApplication {
 	
 	@RequestMapping("/echoheaders")
 	public String echoHeaders(@RequestHeader Map<String, String> headers) {
+		String podName = "Pod Name: "+System.getenv("HOSTNAME")+"\n";
 		String mapAsString = headers.entrySet().stream()
 			.map(entry -> entry.getKey() + "=" + entry.getValue())
 			.collect(Collectors.joining(", \n", "{\n", "\n}\n"));
 		String accessToken = headers.get("Authorization");
 		if(null == accessToken) accessToken = headers.get("authorization");
 		String serviceMessage = "";
-		String returnMessage = "Client Request Details: \n"+mapAsString;
+		String reqDetails = podName + mapAsString;
+		String returnMessage = "Client Request Details: \n"+reqDetails;
 		System.out.println("Access Token in Echo Headers: "+ accessToken);
 		try {
 			if(null == accessToken) {
