@@ -397,7 +397,7 @@ x-b3-sampled=1
 }
 ```
 
-## Service Access Control
+## RBAC for microservices
 In this section we will use Istio's RBAC (Role Based Access Control) to control service access
 
 * Follow the steps mentioned in [Origin Auth using JWT](#origin-authentication-using-jwt)
