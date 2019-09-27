@@ -396,3 +396,33 @@ x-b3-parentspanid=ce4688d634bc85c6,
 x-b3-sampled=1
 }
 ```
+
+## Service Access Control
+In this section we will use Istio's RBAC (Role Based Access Control) to control service access
+
+* Follow the steps mentioned in [Origin Auth using JWT](#origin-authentication-using-jwt)
+* Run the following command to restrict access to the ```k8s-service-1``` service from only the ```k8s-client``` service
+  ```
+  kubectl apply -f istio/create-service-role.yaml
+  ```
+* The following commands will only work. Note the changes to the ```version``` header values in the commands below.
+  ```
+  curl http://localhost:80/welcome -H "Authorization: Bearer $JWT_TOKEN" -H "version: v1"
+  curl http://localhost:80/welcome -H "Authorization: Bearer $JWT_TOKEN" -H "version: v2"
+  curl http://localhost:80/echoheaders -H "Authorization: Bearer $JWT_TOKEN" -H "version: v3"
+  curl http://localhost:80/echoheaders -H "Authorization: Bearer $JWT_TOKEN" -H "version: v4"
+  ```
+  In addition to restricting access to a service using user name (in this case, 'service user name'), access can be
+  restricted based on header information. The ```welcome``` endpoint only allows access to requests with header
+  ```v1``` and ```v2```.
+* The following commands will not work. Note that we are trying to directly access the ```k8s-service-1``` service.
+  ```
+  # We are trying to directly access the endpoint in 'k8s-service-1'.
+  curl http://localhost:80/hello -H "Authorization: Bearer $JWT_TOKEN"
+  # We are not passing the correct versions 'v1' and 'v2' for the 'version' value
+  curl http://localhost:80/welcome -H "Authorization: Bearer $JWT_TOKEN" -H "version: v3"
+  ```
+  The output for access failure will be
+  ```
+  RBAC: access denied
+  ```

@@ -11,6 +11,12 @@ spec:
     - port: 8081
       name: http
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: service-1-sa
+  namespace: vj-istio
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -31,6 +37,7 @@ spec:
         release: test
         app: service-1
     spec:
+      serviceAccountName: service-1-sa
       containers:
       - name: k8s-service-1-container
         image: vprince/k8s-service-1-image:latest

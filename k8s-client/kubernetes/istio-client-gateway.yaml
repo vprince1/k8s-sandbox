@@ -2,6 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: client-gateway
+  namespace: vj-istio
 spec:
   selector:
     istio: ingressgateway # use istio default controller

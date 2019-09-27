@@ -1,0 +1,65 @@
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ClusterRbacConfig
+metadata:
+  name: default
+spec:
+  mode: 'ON_WITH_INCLUSION'
+  inclusion:
+    namespaces: ["default", "vj-istio"]
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRole
+metadata:
+  name: app-1-client-read
+  namespace: vj-istio
+spec:
+  rules:
+  - services: ["k8s-client.vj-istio.svc.cluster.local"]
+    methods: ["GET", "HEAD"]
+    paths: ["/welcome"]
+    constraints:
+    - key: request.headers[version]
+      values: ["v1", "v2"]
+  - services: ["k8s-client.vj-istio.svc.cluster.local"]
+    methods: ["GET", "HEAD"]
+    paths: ["/echoheaders"]
+    constraints:
+    - key: request.headers[version]
+      values: ["v3", "v4"]
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRoleBinding
+metadata:
+  name: app-1-client-read-binding
+  namespace: vj-istio
+spec:
+  subjects:
+  - user: "*"
+  - properties:
+      source.principal: "*"
+  roleRef:
+    kind: ServiceRole
+    name: "app-1-client-read"
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRole
+metadata:
+  name: app-1-service-1-read
+  namespace: vj-istio
+spec:
+  rules:
+  - services: ["k8s-service-1.vj-istio.svc.cluster.local"]
+    methods: ["GET", "HEAD"]
+    paths: ["/hello", "/echoserviceheaders"]
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRoleBinding
+metadata:
+  name: app-1-service-1-read-binding
+  namespace: vj-istio
+spec:
+  subjects:
+  - user: "cluster.local/ns/vj-istio/sa/client-1-sa"
+  roleRef:
+    kind: ServiceRole
+    name: "app-1-service-1-read"
